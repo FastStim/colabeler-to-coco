@@ -56,7 +56,6 @@ from os.path import isfile, join
 import json
 import datetime
 
-
 def save_json(coco_json, output_json, debug):
     with open(output_json, 'w') as outfile:
         json.dump(coco_json, outfile)
@@ -64,7 +63,7 @@ def save_json(coco_json, output_json, debug):
     print(' \033[33m[OK]\033[0m save json file')
 
 
-def add_json_images(input_json, all_count, debug):
+def add_json_images(input_json, images_dir, spl, all_count, debug):
     i = 0
     j = 0
     count = 0
@@ -75,10 +74,10 @@ def add_json_images(input_json, all_count, debug):
     for js in input_json:
         pos += 1
         if not js['outputs']:
-            print('\033[31m [%04d/%04d]\033[0m %s \033[31mwrong\033[0m' % (pos, all_count, js['path'].rsplit('\\', 1)[1]))
+            print('\033[31m [%04d/%04d]\033[0m %s \033[31mwrong\033[0m' % (pos, all_count, js['path'].rsplit(spl, 1)[1]))
             continue
 
-        print('\033[34m [%04d/%04d]\033[0m %s \033[34mcorrect\033[0m' % (pos, all_count, js['path'].rsplit('\\', 1)[1]))
+        print('\033[34m [%04d/%04d]\033[0m %s \033[34mcorrect\033[0m' % (pos, all_count, js['path'].rsplit(spl, 1)[1]))
 
         count += 1
         i += 1
@@ -88,7 +87,7 @@ def add_json_images(input_json, all_count, debug):
             'id': i,
             'width': js['size']['width'],
             'height': js['size']['height'],
-            'file_name': js['path'],
+            'file_name': images_dir + js['path'].rsplit(spl, 1)[1],
             'license': 1,
             # 'flickr_url': '',
             # 'coco_url': '',
@@ -196,7 +195,7 @@ def parse_json(files, debug):
     return data
 
 
-def main(input_dir, output, debug):
+def main(input_dir, output, images_dir, spl, debug):
     print('\033[1m\033[35m start program\033[0m')
     if debug:
         print(' input_dir = "%s"' % input_dir)
@@ -213,7 +212,7 @@ def main(input_dir, output, debug):
         print(' files %s' % json_files)
 
     input_json = parse_json(json_files, debug)
-    coco_json['images'], coco_json['annotations'] = add_json_images(input_json, all_count, debug)
+    coco_json['images'], coco_json['annotations'] = add_json_images(input_json, images_dir, spl, all_count, debug)
 
     save_json(coco_json, output, debug)
 
@@ -227,6 +226,9 @@ if __name__ == "__main__":
                         help='Input directory single json file')
     parser.add_argument('--output', required=True, dest='output', type=str, default=None,
                         help='Output file for save json COCO dataset')
+    parser.add_argument('--images_dir', required=True, dest='images_dir', type=str, default=None)
+    parser.add_argument('--split', required=False, dest='spl', type=str, default='\\')
+
     args = parser.parse_args()
 
-    main(args.input_dir, args.output, args.debug)
+    main(args.input_dir, args.output, args.images_dir, args.spl, args.debug)
