@@ -56,6 +56,7 @@ from os.path import isfile, join
 import json
 import datetime
 
+
 def save_json(coco_json, output_json, debug):
     with open(output_json, 'w') as outfile:
         json.dump(coco_json, outfile)
